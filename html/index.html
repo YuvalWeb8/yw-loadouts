@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loadouts UI</title>
+    <style>
+        body {
+            display: none; 
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: display 0.3s ease; 
+        }
+
+
+        #loadouts-container {
+            width: 90%; 
+            max-width: 1600px;
+            height: fit-content; 
+            background: rgba(19, 19, 19, 0.95);
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            clip-path: polygon(3% 0%, 100% 0%, 97% 100%, 0% 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin: auto;
+            overflow: hidden; 
+            border-radius: 12px;
+        }
+
+
+        #loadouts-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        #loadouts-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 2.4px;
+        }
+
+        #loadouts-title::before {
+            content: "";
+            position: absolute;
+            left: -10%;
+            right: -10%;
+            top: -36px;
+            width: 120%;
+            height: 230%;
+            background-color: #328627;
+            border-radius: 12px;
+            z-index: -1;
+        }
+
+
+        #loadout-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 80px 20px; 
+            justify-items: center;
+            align-items: center;
+            padding-top: 50px;
+            padding-bottom: 20px;
+        }
+
+
+        .loadout-item {
+            width: 100%; 
+            max-width: 220px;
+            height: 220px;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            background-size: cover;
+            background-color: rgba(0, 0, 0, 0.3); 
+            border-radius: 18px;
+            padding: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); 
+        }
+
+        .loadout-item:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .loadout-item img {
+            width: 90%; 
+            height: 90%;
+            object-fit: contain; 
+            margin-bottom: 5px;
+        }
+
+        .loadout-name {
+            font-size: 16px;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #loadouts-footer {
+            margin-top: 30px; 
+            color: #bbb; 
+            font-size: 14px;
+            text-align: center;
+        }
+
+        #loadouts-footer a {
+            color: #68ff54; 
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadouts-container">
+        <div id="loadouts-title">LOADOUTS</div>
+        <div id="loadout-container"></div>
+        <div id="loadouts-footer">
+            <p>Powered by <a href="#">YuvalWeb</a></p>
+        </div>
+    </div>
+    
+    <script src="nui://game/ui/jquery.js" type="text/javascript"></script>
+
+    <script>
+window.addEventListener("message", function(event) {
+    if (event.data.action == "showLoadouts") {
+        document.body.style.display = "flex"; 
+        document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; 
+    }
+
+    if (event.data.action == "hideLoadouts") {
+        document.body.style.display = "none"; 
+        document.body.style.backgroundColor = 'transparent'; 
+    }
+
+    if (event.data.action == "updateLoadouts") {
+        const loadouts = event.data.loadouts;
+        const container = document.getElementById("loadout-container");
+        container.innerHTML = '';  
+
+        loadouts.forEach(function(loadout) {
+            const loadoutButton = document.createElement("button");
+            loadoutButton.classList.add("loadout-item"); 
+
+            const image = document.createElement("img");
+            image.src = `/${loadout.image}`;  
+            loadoutButton.appendChild(image);
+
+            const name = document.createElement("div");
+            name.classList.add("loadout-name");
+            name.textContent = loadout.LoadoutName; 
+            loadoutButton.appendChild(name);
+
+            container.appendChild(loadoutButton);
+
+            loadoutButton.addEventListener("click", function() {
+                fetch(`https://${GetParentResourceName()}/loadoutSelected`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name: loadout.name })
+                });
+            });
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            document.body.style.display = "none"; 
+            document.body.style.backgroundColor = 'transparent'; 
+
+            fetch(`https://${GetParentResourceName()}/closeUI`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
